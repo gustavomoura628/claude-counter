@@ -303,11 +303,11 @@
 			refreshUsage();
 		}
 
-		// Optional hourly safety refresh.
-		const ONE_HOUR_MS = 60 * 60 * 1000;
-		const sseAge = now - lastUsageSseMs;
+		// Periodic background refresh so usage stays current even when
+		// activity happens outside this tab (e.g. Claude Code, mobile).
+		const REFRESH_INTERVAL_MS = 30 * 1000;
 		const anyAge = now - lastUsageUpdateMs;
-		if (!document.hidden && sseAge > ONE_HOUR_MS && anyAge > ONE_HOUR_MS) {
+		if (anyAge > REFRESH_INTERVAL_MS) {
 			refreshUsage();
 		}
 	}

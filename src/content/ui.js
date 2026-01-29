@@ -318,8 +318,35 @@
 			if (!this.usageLine) return;
 			const modelSelector = document.querySelector(CC.DOM.MODEL_SELECTOR_DROPDOWN);
 			if (!modelSelector) return;
-			const selectorLine = modelSelector.parentElement?.parentElement;
+
+			// Walk up from the model selector to find the toolbar row.
+			// The toolbar row is the ancestor whose parent also contains the
+			// text input area as a sibling. This avoids hardcoding a specific
+			// nesting depth which breaks when Claude.ai's DOM structure changes.
+			let selectorLine = modelSelector;
+			let found = false;
+			while (selectorLine.parentElement) {
+				const parent = selectorLine.parentElement;
+				for (const sibling of parent.children) {
+					if (sibling === selectorLine || sibling === this.usageLine) continue;
+					if (
+						sibling.matches('[role="textbox"], textarea, [contenteditable="true"]') ||
+						sibling.querySelector('[role="textbox"], textarea, [contenteditable="true"]')
+					) {
+						found = true;
+						break;
+					}
+				}
+				if (found) break;
+				selectorLine = parent;
+			}
+
+			if (!found) {
+				// Fallback to original approach
+				selectorLine = modelSelector.parentElement?.parentElement;
+			}
 			if (!selectorLine) return;
+
 			if (selectorLine.nextElementSibling !== this.usageLine) {
 				selectorLine.after(this.usageLine);
 			}
